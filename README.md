@@ -1,8 +1,8 @@
-# 🇩🇪 German Reader - Interactive Language Learning Tool
+# 🇩🇪 tradux - Interactive Language Learning Tool
 
 A modern, user-friendly web application designed to help German language learners read and understand German texts with ease. Built with React and featuring real-time translations, this tool makes reading German texts more accessible and enjoyable.
 
-![German Reader Demo](demo-screenshot.png)
+![tradux Demo](demo-screenshot.png)
 
 ## ✨ Features
 
@@ -33,12 +33,12 @@ A modern, user-friendly web application designed to help German language learner
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/german-reader.git
+   git clone https://github.com/mattfelber/tradux.git
    ```
 
 2. Install dependencies:
    ```bash
-   cd german-reader
+   cd tradux
    npm install
    ```
 
