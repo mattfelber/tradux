@@ -1,34 +1,34 @@
 import axios from 'axios';
 
 const translateText = async (text) => {
-    // Debug: Check if API key is available
-    console.log('API Key available:', !!process.env.REACT_APP_RAPIDAPI_KEY);
-    console.log('API Key length:', process.env.REACT_APP_RAPIDAPI_KEY?.length);
-
+    // Using Google Cloud Translation API
+    const apiKey = process.env.REACT_APP_GOOGLE_TRANSLATE_API_KEY;
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    
     const options = {
-        method: 'GET',
-        url: 'https://translated-mymemory---translation-memory.p.rapidapi.com/get',
-        params: {
-            langpair: 'de|en',
+        method: 'POST',
+        url: url,
+        data: {
             q: text,
-            mt: '1',
-            onlyprivate: '0',
-            de: 'a@b.c'
+            source: 'de',
+            target: 'en',
+            format: 'text'
         },
         headers: {
-            'X-RapidAPI-Key': process.env.REACT_APP_RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'translated-mymemory---translation-memory.p.rapidapi.com'
+            'Content-Type': 'application/json'
         }
     };
 
     try {
         console.log('Attempting to translate:', text);
-        console.log('Request headers:', options.headers); // Debug: Check headers
         const response = await axios.request(options);
         console.log('Translation response:', response.data);
         
-        if (response.data && response.data.responseData) {
-            return response.data.responseData.translatedText;
+        if (response.data && 
+            response.data.data && 
+            response.data.data.translations && 
+            response.data.data.translations[0]) {
+            return response.data.data.translations[0].translatedText;
         } else {
             console.error('Unexpected response structure:', response.data);
             return 'Translation error: Unexpected response';
