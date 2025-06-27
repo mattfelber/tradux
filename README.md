@@ -2,7 +2,7 @@
 
 A modern, user-friendly web application designed to help language learners read and understand texts in multiple languages with ease. Built with React and featuring real-time translations powered by Google Cloud Translation API, this tool makes reading foreign language texts more accessible and enjoyable.
 
-![tradux Demo](demo-screenshot.png)
+![tradux Interface](https://i.imgur.com/6Ky2Zj7.png)
 
 ## ✨ Features
 
