@@ -200,6 +200,14 @@ const TextReader = () => {
   // Modified translation functions to use selected languages
   const handleWordClickWithLang = async (event, word) => {
     event.stopPropagation();
+    
+    // Check if the clicked word is the same as the currently translated word
+    // If so, toggle off the translation
+    if (translation && event.target.textContent.trim() === word) {
+      setTranslation(null);
+      return;
+    }
+    
     setSelectionTranslation(null);
     setIsLoading(true);
     
@@ -246,6 +254,13 @@ const TextReader = () => {
 
       const { text, range } = expandedSelection;
       
+      // Toggle off selection translation if clicking the same selection
+      if (text && selectionTranslation && text === window.lastTranslatedSelection) {
+        setSelectionTranslation(null);
+        window.lastTranslatedSelection = null;
+        return;
+      }
+      
       if (text) {
         setTranslation(null);
         setIsLoading(true);
@@ -257,6 +272,7 @@ const TextReader = () => {
         try {
           const result = await translateText(text, sourceLang, targetLang);
           setSelectionTranslation(result.translatedText);
+          window.lastTranslatedSelection = text; // Store the last translated selection
         } catch (error) {
           console.error('Translation error:', error);
           setSelectionTranslation('Translation error occurred');
