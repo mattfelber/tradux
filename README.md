@@ -45,11 +45,18 @@ A modern, user-friendly web application designed to help language learners read 
    npm install
    ```
 
+<<<<<<< HEAD
 3. Set up your Google Cloud Translation API key:
    - Create a Google Cloud account at [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project
    - Enable the Cloud Translation API
    - Create an API key in the Credentials section
+=======
+3. Set up your API key:
+   - Sign up for a free API key at [Google Cloud Console](https://console.cloud.google.com/)
+   - Enable the Cloud Translation API in your Google Cloud project
+   - Create an API key in the "APIs & Services" > "Credentials" section
+>>>>>>> api-translation
    - Create a `.env` file in the root directory
    - Add your API key:
      ```
@@ -105,7 +112,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Translation services provided by MyMemory via RapidAPI
+- Translation services provided by Google Cloud Translation API
 - UI design inspired by modern reading applications
 - Special thanks to the React and Material-UI teams
 

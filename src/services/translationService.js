@@ -7,7 +7,6 @@ const translateText = async (text, sourceLang = 'auto', targetLang = 'en') => {
     // Debug: Check if API key is available
     console.log('Google API Key available:', !!apiKey);
     console.log('Google API Key length:', apiKey?.length);
-    
     const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
     
     const options = {
