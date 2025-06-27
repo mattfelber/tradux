@@ -1,19 +1,20 @@
-# 🇩🇪 tradux - Interactive Language Learning Tool
+# 🌐 tradux - Interactive Multi-Language Translation Tool
 
-A modern, user-friendly web application designed to help German language learners read and understand German texts with ease. Built with React and featuring real-time translations, this tool makes reading German texts more accessible and enjoyable.
+A modern, user-friendly web application designed to help language learners read and understand texts in multiple languages with ease. Built with React and featuring real-time translations powered by Google Cloud Translation API, this tool makes reading foreign language texts more accessible and enjoyable.
 
 ![tradux Demo](demo-screenshot.png)
 
 ## ✨ Features
 
 ### 📚 Interactive Reading Experience
-- **Single Word Translation**: Click on any German word to see its English translation instantly
+- **Single Word Translation**: Click on any word to see its translation instantly
 - **Phrase Translation**: Select multiple words to get contextual translations of phrases or sentences
 - **Smart Word Selection**: Automatically selects complete words even when clicking or selecting partially
 - **Clean Interface**: Translations appear in elegant popups near the selected text
+- **Language Selection**: Choose from multiple source and target languages
 
 ### 📝 Text Management
-- **File Upload**: Easily upload German text files through drag-and-drop or file selection
+- **File Upload**: Easily upload text files in any language through drag-and-drop or file selection
 - **Format Support**: Compatible with plain text (.txt) files
 - **Dynamic Display**: Text is formatted for optimal readability with clear word separation
 
@@ -25,7 +26,9 @@ A modern, user-friendly web application designed to help German language learner
 - **Visual Feedback**: Subtle highlights and animations for better interaction feedback
 
 ### 🔄 Translation Features
-- **Real-Time Translation**: Instant translations powered by MyMemory Translation API
+- **Real-Time Translation**: Instant translations powered by Google Cloud Translation API
+- **Multi-Language Support**: Translate between 100+ languages
+- **Auto-Detection**: Automatically detect the source language or specify it manually
 - **Context-Aware**: Different handling for single words vs. phrases
 - **Error Handling**: Graceful handling of translation errors with user feedback
 
@@ -42,13 +45,17 @@ A modern, user-friendly web application designed to help German language learner
    npm install
    ```
 
-3. Set up your API key:
-   - Sign up for a free API key at [RapidAPI](https://rapidapi.com)
+3. Set up your Google Cloud Translation API key:
+   - Create a Google Cloud account at [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project
+   - Enable the Cloud Translation API
+   - Create an API key in the Credentials section
    - Create a `.env` file in the root directory
    - Add your API key:
      ```
-     REACT_APP_RAPIDAPI_KEY=your_api_key_here
+     REACT_APP_GOOGLE_TRANSLATE_API_KEY=your_google_api_key_here
      ```
+   - **Important**: Restart the development server after changing the `.env` file
 
 4. Start the development server:
    ```bash
@@ -62,17 +69,21 @@ A modern, user-friendly web application designed to help German language learner
 - **Frontend**: React.js
 - **UI Components**: Material-UI
 - **Styling**: CSS with custom variables for theming
-- **Translation**: MyMemory Translation API via RapidAPI
+- **Translation**: Google Cloud Translation API
 - **HTTP Client**: Axios for API requests
 
 ## 📖 How to Use
 
-1. **Upload Text**:
-   - Drag and drop a German text file onto the upload area
+1. **Select Languages**:
+   - Choose your source language (or use Auto-detect)
+   - Choose your target language
+
+2. **Upload Text**:
+   - Drag and drop a text file in any language onto the upload area
    - Or click to select a file from your computer
 
-2. **Get Word Translations**:
-   - Click any word to see its English translation
+3. **Get Word Translations**:
+   - Click any word to see its translation in your chosen target language
    - Translation appears in a popup above or below the word
 
 3. **Get Phrase Translations**:
