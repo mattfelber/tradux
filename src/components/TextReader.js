@@ -254,10 +254,10 @@ const TextReader = () => {
     <div className="reader-container" onClick={clearTranslations}>
       <div className="app-header" onClick={(e) => e.stopPropagation()}>
         <Typography variant="h1" className="app-title">
-          <span className="tradux-highlight">tradux</span> Reader
+          tradux Reader
         </Typography>
-        <Typography variant="subtitle1" className="app-subtitle">
-          Unlock any language with a <span className="highlight-text">click</span> or <span className="highlight-text">selection</span>
+        <Typography variant="subtitle1" color="textSecondary">
+          Instant translations for any text with a simple click
         </Typography>
 
         <div className="language-selector">
