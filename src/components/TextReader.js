@@ -68,72 +68,11 @@ const TextReader = () => {
   };
 
   const handleTextSelection = async () => {
-    if (translationTimeoutRef.current) {
-      clearTimeout(translationTimeoutRef.current);
-    }
-
-    translationTimeoutRef.current = setTimeout(async () => {
-      const selection = window.getSelection();
-      const selectedText = selection.toString().trim();
-      
-      // Clear translations if no text is selected
-      if (!selectedText) {
-        clearTranslations();
-        return;
-      }
-
-      // If it's just a single word click, don't show selection translation
-      if (!isDragging && selectedText.split(/\s+/).length === 1) {
-        return;
-      }
-
-      const expandedSelection = expandSelectionToWords();
-      if (!expandedSelection) {
-        setSelectionTranslation(null);
-        return;
-      }
-
-      const { text, range } = expandedSelection;
-      
-      if (text) {
-        setTranslation(null);
-        setIsLoading(true);
-        
-        const rect = range.getBoundingClientRect();
-        const position = calculatePosition(rect);
-        setSelectionPosition(position);
-
-        try {
-          const translatedText = await translateText(text);
-          setSelectionTranslation(translatedText);
-        } catch (error) {
-          console.error('Translation error:', error);
-          setSelectionTranslation('Translation error occurred');
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    }, 300);
+    handleTextSelectionWithLang();
   };
 
   const handleWordClick = async (event, word) => {
-    event.stopPropagation();
-    setSelectionTranslation(null);
-    setIsLoading(true);
-    
-    const rect = event.target.getBoundingClientRect();
-    const position = calculatePosition(rect);
-    setPopupPosition(position);
-
-    try {
-      const translatedText = await translateText(word);
-      setTranslation(translatedText);
-    } catch (error) {
-      console.error('Translation error:', error);
-      setTranslation('Translation error occurred');
-    } finally {
-      setIsLoading(false);
-    }
+    handleWordClickWithLang(event, word);
   };
 
   const renderWords = (text) => {
@@ -223,15 +162,131 @@ const TextReader = () => {
     };
   }, []);
 
+  const [sourceLang, setSourceLang] = useState('auto');
+  const [targetLang, setTargetLang] = useState('en');
+
+  // Common language options
+  const languageOptions = [
+    { code: 'auto', name: 'Auto-detect' },
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'it', name: 'Italian' },
+    { code: 'pt', name: 'Portuguese' },
+    { code: 'ru', name: 'Russian' },
+    { code: 'zh', name: 'Chinese' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'ko', name: 'Korean' }
+  ];
+
+  // Modified translation functions to use selected languages
+  const handleWordClickWithLang = async (event, word) => {
+    event.stopPropagation();
+    setSelectionTranslation(null);
+    setIsLoading(true);
+    
+    const rect = event.target.getBoundingClientRect();
+    const position = calculatePosition(rect);
+    setPopupPosition(position);
+
+    try {
+      const result = await translateText(word, sourceLang, targetLang);
+      setTranslation(result.translatedText);
+    } catch (error) {
+      console.error('Translation error:', error);
+      setTranslation('Translation error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTextSelectionWithLang = async () => {
+    if (translationTimeoutRef.current) {
+      clearTimeout(translationTimeoutRef.current);
+    }
+
+    translationTimeoutRef.current = setTimeout(async () => {
+      const selection = window.getSelection();
+      const selectedText = selection.toString().trim();
+      
+      // Clear translations if no text is selected
+      if (!selectedText) {
+        clearTranslations();
+        return;
+      }
+
+      // If it's just a single word click, don't show selection translation
+      if (!isDragging && selectedText.split(/\s+/).length === 1) {
+        return;
+      }
+
+      const expandedSelection = expandSelectionToWords();
+      if (!expandedSelection) {
+        setSelectionTranslation(null);
+        return;
+      }
+
+      const { text, range } = expandedSelection;
+      
+      if (text) {
+        setTranslation(null);
+        setIsLoading(true);
+        
+        const rect = range.getBoundingClientRect();
+        const position = calculatePosition(rect);
+        setSelectionPosition(position);
+
+        try {
+          const result = await translateText(text, sourceLang, targetLang);
+          setSelectionTranslation(result.translatedText);
+        } catch (error) {
+          console.error('Translation error:', error);
+          setSelectionTranslation('Translation error occurred');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    }, 300);
+  };
+
   return (
     <div className="reader-container" onClick={clearTranslations}>
       <div className="app-header" onClick={(e) => e.stopPropagation()}>
         <Typography variant="h1" className="app-title">
-          German Reader
+          Language Reader
         </Typography>
         <Typography variant="subtitle1" color="textSecondary">
           Click words for translations or select text for phrase translations
         </Typography>
+
+        <div className="language-selector">
+          <div className="language-select-container">
+            <Typography variant="body2" color="textSecondary">Source:</Typography>
+            <select 
+              value={sourceLang} 
+              onChange={(e) => setSourceLang(e.target.value)}
+              className="language-select"
+            >
+              {languageOptions.map(lang => (
+                <option key={`source-${lang.code}`} value={lang.code}>{lang.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="language-select-container">
+            <Typography variant="body2" color="textSecondary">Target:</Typography>
+            <select 
+              value={targetLang} 
+              onChange={(e) => setTargetLang(e.target.value)}
+              className="language-select"
+            >
+              {languageOptions.filter(lang => lang.code !== 'auto').map(lang => (
+                <option key={`target-${lang.code}`} value={lang.code}>{lang.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
       </div>
 
       <div
@@ -252,7 +307,7 @@ const TextReader = () => {
         <div className="upload-icon">📄</div>
         <label htmlFor="file-upload">
           <Typography variant="h6" color="primary" style={{ cursor: 'pointer' }}>
-            Drop your German text file here
+            Drop your text file here
           </Typography>
           <Typography variant="body2" color="textSecondary">
             or click to upload
@@ -274,7 +329,7 @@ const TextReader = () => {
       >
         {text ? renderWords(text) : (
           <Typography variant="body1" color="textSecondary" align="center">
-            Your German text will appear here
+            Your text will appear here
           </Typography>
         )}
       </Paper>

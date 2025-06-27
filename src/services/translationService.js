@@ -1,41 +1,60 @@
 import axios from 'axios';
 
-const translateText = async (text) => {
+const translateText = async (text, sourceLang = 'auto', targetLang = 'en') => {
+    // Using Google Cloud Translation API
+    const apiKey = process.env.REACT_APP_GOOGLE_TRANSLATE_API_KEY;
+    
     // Debug: Check if API key is available
-    console.log('API Key available:', !!process.env.REACT_APP_RAPIDAPI_KEY);
-    console.log('API Key length:', process.env.REACT_APP_RAPIDAPI_KEY?.length);
-
+    console.log('Google API Key available:', !!apiKey);
+    console.log('Google API Key length:', apiKey?.length);
+    
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+    
     const options = {
-        method: 'GET',
-        url: 'https://translated-mymemory---translation-memory.p.rapidapi.com/get',
-        params: {
-            langpair: 'de|en',
+        method: 'POST',
+        url: url,
+        data: {
             q: text,
-            mt: '1',
-            onlyprivate: '0',
-            de: 'a@b.c'
+            target: targetLang,
+            format: 'text'
         },
         headers: {
-            'X-RapidAPI-Key': process.env.REACT_APP_RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'translated-mymemory---translation-memory.p.rapidapi.com'
+            'Content-Type': 'application/json'
         }
     };
+    
+    // Only add source if it's not set to auto-detect
+    if (sourceLang !== 'auto') {
+        options.data.source = sourceLang;
+    }
 
     try {
         console.log('Attempting to translate:', text);
-        console.log('Request headers:', options.headers); // Debug: Check headers
+        console.log('Source language:', sourceLang);
+        console.log('Target language:', targetLang);
+        
         const response = await axios.request(options);
         console.log('Translation response:', response.data);
         
-        if (response.data && response.data.responseData) {
-            return response.data.responseData.translatedText;
+        if (response.data && 
+            response.data.data && 
+            response.data.data.translations && 
+            response.data.data.translations[0]) {
+            
+            // Return both the translated text and detected source language (if available)
+            const result = {
+                translatedText: response.data.data.translations[0].translatedText,
+                detectedSourceLanguage: response.data.data.translations[0].detectedSourceLanguage
+            };
+            
+            return result;
         } else {
             console.error('Unexpected response structure:', response.data);
-            return 'Translation error: Unexpected response';
+            return { translatedText: 'Translation error: Unexpected response' };
         }
     } catch (error) {
         console.error('Translation error:', error.response?.data || error.message);
-        return 'Translation error occurred';
+        return { translatedText: 'Translation error occurred' };
     }
 };
 
