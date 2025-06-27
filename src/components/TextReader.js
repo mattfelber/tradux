@@ -155,7 +155,24 @@ const TextReader = () => {
   };
 
   useEffect(() => {
+    // Add global click event listener to handle clicks outside the translation popup
+    const handleGlobalClick = (e) => {
+      // Check if click is outside both translation popups
+      const isOutsidePopup = (
+        !e.target.closest('.translation-popup') && 
+        !e.target.closest('.selection-translation') &&
+        !e.target.closest('.word')
+      );
+      
+      if (isOutsidePopup) {
+        clearTranslations();
+      }
+    };
+    
+    document.addEventListener('click', handleGlobalClick);
+    
     return () => {
+      document.removeEventListener('click', handleGlobalClick);
       if (translationTimeoutRef.current) {
         clearTimeout(translationTimeoutRef.current);
       }
@@ -254,10 +271,10 @@ const TextReader = () => {
     <div className="reader-container" onClick={clearTranslations}>
       <div className="app-header" onClick={(e) => e.stopPropagation()}>
         <Typography variant="h1" className="app-title">
-          tradux Reader
+          Tradux Reader
         </Typography>
         <Typography variant="subtitle1" color="textSecondary">
-          Instant translations for any text with a simple click
+          Instant translations with a <span className="highlight-word">click</span> or <span className="highlight-word">selection</span>
         </Typography>
 
         <div className="language-selector">

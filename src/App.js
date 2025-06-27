@@ -1,39 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
 import TextReader from './components/TextReader';
 import ApiTest from './components/ApiTest';
+import ThemeToggle from './components/ThemeToggle';
 import './App.css';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#007AFF',
-    },
-    background: {
-      default: '#F5F5F7',
-    },
-  },
-  typography: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  },
-  components: {
-    MuiPaper: {
-      defaultProps: {
-        elevation: 0,
+function App() {
+  const [darkMode, setDarkMode] = useState(() => {
+    // Check if user has a preference saved in localStorage
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode === 'true' ? true : false;
+  });
+
+  useEffect(() => {
+    // Apply the theme to the document
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    // Save user preference to localStorage
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
+  const theme = createTheme({
+    palette: {
+      mode: darkMode ? 'dark' : 'light',
+      primary: {
+        main: darkMode ? '#5B9DF5' : '#007AFF',
       },
-      styleOverrides: {
-        root: {
-          backgroundColor: '#ffffff',
+      background: {
+        default: darkMode ? '#121212' : '#F5F5F7',
+        paper: darkMode ? '#1E1E1E' : '#ffffff',
+      },
+      text: {
+        primary: darkMode ? '#E4E6EB' : '#2C3E50',
+        secondary: darkMode ? '#A0AEC0' : '#5A6A7A',
+      },
+    },
+    typography: {
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    },
+    components: {
+      MuiPaper: {
+        defaultProps: {
+          elevation: 0,
+        },
+        styleOverrides: {
+          root: {
+            backgroundColor: darkMode ? '#1E1E1E' : '#ffffff',
+          },
         },
       },
     },
-  },
-});
+  });
 
-function App() {
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
+        <div className="theme-toggle-container" style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000 }}>
+          <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+        </div>
         <ApiTest />
         <TextReader />
       </div>
