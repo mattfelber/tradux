@@ -4,9 +4,11 @@ const translateText = async (text, sourceLang = 'auto', targetLang = 'en') => {
     // Using Google Cloud Translation API
     const apiKey = process.env.REACT_APP_GOOGLE_TRANSLATE_API_KEY;
     
-    // Debug: Check if API key is available
-    console.log('Google API Key available:', !!apiKey);
-    console.log('Google API Key length:', apiKey?.length);
+    // Check if API key is available without logging sensitive information
+    if (!apiKey) {
+        console.error('Translation API key is not configured');
+        return { translatedText: 'Error: Translation service not properly configured' };
+    }
     const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
     
     const options = {
