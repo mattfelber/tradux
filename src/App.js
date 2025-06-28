@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, Container, Box } from '@mui/material';
+import { ThemeProvider, createTheme, Container, Box, AppBar, Toolbar, Typography, Button, Tabs, Tab } from '@mui/material';
 import TextReader from './components/TextReader';
 import ApiTest from './components/ApiTest';
 import ThemeToggle from './components/ThemeToggle';
 import UsageDashboard from './components/UsageDashboard';
+import AdminDashboard from './components/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -12,6 +13,10 @@ function App() {
     const savedMode = localStorage.getItem('darkMode');
     return savedMode === 'true' ? true : false;
   });
+  
+  // State for admin mode and tab navigation
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [currentTab, setCurrentTab] = useState('translator');
 
   useEffect(() => {
     // Apply the theme to the document
@@ -22,6 +27,14 @@ function App() {
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
+  };
+  
+  const toggleAdminMode = () => {
+    setIsAdminMode(!isAdminMode);
+  };
+  
+  const handleTabChange = (event, newValue) => {
+    setCurrentTab(newValue);
   };
 
   const theme = createTheme({
@@ -59,14 +72,39 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
-        <div className="theme-toggle-container" style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000 }}>
-          <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-        </div>
+        <AppBar position="static" color="default" elevation={0}>
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Tradux
+            </Typography>
+            <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            <Button 
+              color={isAdminMode ? "primary" : "inherit"}
+              onClick={toggleAdminMode}
+              sx={{ ml: 2 }}
+            >
+              {isAdminMode ? "Exit Admin" : "Admin Mode"}
+            </Button>
+          </Toolbar>
+          
+          <Tabs 
+            value={currentTab} 
+            onChange={handleTabChange}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+          >
+            <Tab label="Translator" value="translator" />
+            <Tab label="Usage" value="usage" />
+            {isAdminMode && <Tab label="Admin Dashboard" value="admin" />}
+          </Tabs>
+        </AppBar>
+        
         <Container maxWidth="lg">
           <Box sx={{ mt: 4 }}>
-            <UsageDashboard />
-            <ApiTest />
-            <TextReader />
+            {currentTab === 'translator' && <TextReader />}
+            {currentTab === 'usage' && <UsageDashboard />}
+            {currentTab === 'admin' && isAdminMode && <AdminDashboard />}
           </Box>
         </Container>
       </div>

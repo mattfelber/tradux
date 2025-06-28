@@ -2,6 +2,9 @@ import axios from 'axios';
 import { supabase } from './supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 
+// Constants
+const FREE_TIER_LIMIT = 500; // 500 characters per day for anonymous users
+
 // Helper function to get or create a session ID
 const getSessionId = () => {
     let sessionId = localStorage.getItem('tradux_session_id');
@@ -10,6 +13,51 @@ const getSessionId = () => {
         localStorage.setItem('tradux_session_id', sessionId);
     }
     return sessionId;
+};
+
+// Check if user has exceeded their daily limit
+const checkDailyLimit = async (textLength) => {
+    const sessionId = getSessionId();
+    
+    try {
+        // Check if supabase client is available
+        if (!supabase) {
+            console.error('Supabase client is not initialized');
+            return { allowed: true, remaining: FREE_TIER_LIMIT }; // Default to allowing if we can't check
+        }
+        
+        // Get today's date at midnight
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        // Query for today's usage
+        const { data, error } = await supabase
+            .from('usage_metrics')
+            .select('characters_processed')
+            .eq('session_id', sessionId)
+            .gte('created_at', today.toISOString());
+        
+        if (error) {
+            console.error('Error checking usage limit:', error);
+            return { allowed: true, remaining: FREE_TIER_LIMIT }; // Default to allowing if query fails
+        }
+        
+        // Calculate total usage today
+        const todayUsage = data ? data.reduce((sum, row) => sum + row.characters_processed, 0) : 0;
+        const remaining = Math.max(0, FREE_TIER_LIMIT - todayUsage);
+        
+        // Check if adding the new text would exceed the limit
+        const wouldExceedLimit = todayUsage + textLength > FREE_TIER_LIMIT;
+        
+        return {
+            allowed: !wouldExceedLimit,
+            remaining: remaining,
+            todayUsage: todayUsage
+        };
+    } catch (error) {
+        console.error('Error in checkDailyLimit:', error);
+        return { allowed: true, remaining: FREE_TIER_LIMIT }; // Default to allowing on error
+    }
 };
 
 // Track usage in Supabase
@@ -58,7 +106,25 @@ const trackUsage = async (text, sourceLang, targetLang) => {
 };
 
 const translateText = async (text, sourceLang = 'auto', targetLang = 'en') => {
-    // Track usage first
+    // Check daily limit before translation
+    const limitCheck = await checkDailyLimit(text.length);
+    
+    // If user has exceeded their daily limit, return an error
+    if (!limitCheck.allowed) {
+        console.log('Daily character limit exceeded:', limitCheck);
+        return { 
+            translatedText: null,
+            error: 'Daily character limit exceeded',
+            limitExceeded: true,
+            usage: {
+                todayUsage: limitCheck.todayUsage,
+                remaining: limitCheck.remaining,
+                limit: FREE_TIER_LIMIT
+            }
+        };
+    }
+    
+    // Track usage for this translation
     await trackUsage(text, sourceLang, targetLang);
     
     // Using Google Cloud Translation API

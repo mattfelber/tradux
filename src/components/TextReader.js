@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Paper, Typography, Box, CircularProgress } from '@mui/material';
+import { Paper, Typography, Box, CircularProgress, Alert, LinearProgress, IconButton } from '@mui/material';
 import { translateText } from '../services/translationService';
 
 const TextReader = () => {
@@ -11,6 +11,8 @@ const TextReader = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [mouseDownTime, setMouseDownTime] = useState(0);
+  const [limitExceeded, setLimitExceeded] = useState(false);
+  const [usageInfo, setUsageInfo] = useState(null);
   const textRef = useRef(null);
   const translationTimeoutRef = useRef(null);
 
@@ -217,13 +219,83 @@ const TextReader = () => {
 
     try {
       const result = await translateText(word, sourceLang, targetLang);
-      setTranslation(result.translatedText);
+      
+      if (result.limitExceeded) {
+        setLimitExceeded(true);
+        setUsageInfo(result.usage);
+        setTranslation('Daily character limit exceeded');
+      } else {
+        setTranslation(result.translatedText);
+      }
     } catch (error) {
       console.error('Translation error:', error);
       setTranslation('Translation error occurred');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Function to dismiss the limit notification
+  const dismissLimitNotification = () => {
+    setLimitExceeded(false);
+  };
+
+  // Display limit exceeded notification
+  const renderLimitExceededNotification = () => {
+    if (!limitExceeded || !usageInfo) return null;
+    
+    const { todayUsage, remaining, limit } = usageInfo;
+    const usagePercentage = Math.min(100, (todayUsage / limit) * 100);
+    
+    return (
+      <Alert 
+        severity="warning" 
+        sx={{ 
+          position: 'fixed', 
+          top: '10px', 
+          left: '50%', 
+          transform: 'translateX(-50%)', 
+          width: '80%', 
+          maxWidth: '600px',
+          zIndex: 1000,
+          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+        }}
+        action={
+          <IconButton
+            aria-label="close"
+            color="inherit"
+            size="small"
+            onClick={dismissLimitNotification}
+          >
+            ✕
+          </IconButton>
+        }
+      >
+        <Typography variant="subtitle1" fontWeight="bold">
+          Daily Character Limit Exceeded
+        </Typography>
+        <Typography variant="body2">
+          You've used {todayUsage} of your {limit} free daily character limit.
+        </Typography>
+        <LinearProgress 
+          variant="determinate" 
+          value={usagePercentage} 
+          sx={{ 
+            mt: 1, 
+            mb: 1, 
+            height: 8, 
+            borderRadius: 4,
+            backgroundColor: '#e0e0e0',
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: usagePercentage >= 100 ? '#f44336' : '#ff9800'
+            }
+          }} 
+        />
+        <Typography variant="body2">
+          Your limit will reset at midnight. Consider signing up for a premium account for unlimited translations.
+        </Typography>
+      </Alert>
+    );
   };
 
   const handleTextSelectionWithLang = async () => {
@@ -271,8 +343,15 @@ const TextReader = () => {
 
         try {
           const result = await translateText(text, sourceLang, targetLang);
-          setSelectionTranslation(result.translatedText);
-          window.lastTranslatedSelection = text; // Store the last translated selection
+          
+          if (result.limitExceeded) {
+            setLimitExceeded(true);
+            setUsageInfo(result.usage);
+            setSelectionTranslation('Daily character limit exceeded');
+          } else {
+            setSelectionTranslation(result.translatedText);
+            window.lastTranslatedSelection = text; // Store the last translated selection
+          }
         } catch (error) {
           console.error('Translation error:', error);
           setSelectionTranslation('Translation error occurred');
@@ -285,6 +364,7 @@ const TextReader = () => {
 
   return (
     <div className="reader-container" onClick={clearTranslations}>
+      {renderLimitExceededNotification()}
       <div className="app-header" onClick={(e) => e.stopPropagation()}>
         <Typography variant="h1" className="app-title">
           Tradux Reader

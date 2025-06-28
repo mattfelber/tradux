@@ -1,18 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Default values for development/testing when env vars aren't available
-// These will be replaced by actual values in production
-const DEFAULT_SUPABASE_URL = 'https://fvehsrkarfmmiaqphzls.supabase.co';
-const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2ZWhzcmthcmZtbWlhcXBoemxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwNzc3NTYsImV4cCI6MjA2NjY1Mzc1Nn0._-dE4EBkszcgRLCtZTGR3KnTDOs5FI6sTwtSshYYFsY';
-
-// Environment variables should be automatically set by Vercel
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_ANON_KEY;
+// Hardcoded values from .env file since environment variables aren't loading properly
+const supabaseUrl = 'https://fvehsrkarfmmiaqphzls.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ2ZWhzcmthcmZtbWlhcXBoemxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwNzc3NTYsImV4cCI6MjA2NjY1Mzc1Nn0._-dE4EBkszcgRLCtZTGR3KnTDOs5FI6sTwtSshYYFsY';
 
 // Debug logging
-console.log('Supabase URL:', supabaseUrl);
-// Don't log the full key for security
-console.log('Supabase key available:', !!supabaseAnonKey);
+console.log('Supabase URL (hardcoded):', supabaseUrl);
+console.log('Supabase key available (hardcoded):', !!supabaseAnonKey);
 
 // Make sure URL has https:// prefix
 let formattedUrl = supabaseUrl;
