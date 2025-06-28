@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme, Container, Box, AppBar, Toolbar, Typography, Button, Tabs, Tab } from '@mui/material';
+import { ThemeProvider, createTheme, Container, Box, CssBaseline } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import TextReader from './components/TextReader';
 import ApiTest from './components/ApiTest';
 import ThemeToggle from './components/ThemeToggle';
 import UsageDashboard from './components/UsageDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import AuthPage from './components/auth/AuthPage';
+import UserProfile from './components/auth/UserProfile';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Navbar from './components/layout/Navbar';
+import { AuthProvider } from './contexts/AuthContext';
 import './App.css';
 
 function App() {
@@ -13,10 +19,6 @@ function App() {
     const savedMode = localStorage.getItem('darkMode');
     return savedMode === 'true' ? true : false;
   });
-  
-  // State for admin mode and tab navigation
-  const [isAdminMode, setIsAdminMode] = useState(false);
-  const [currentTab, setCurrentTab] = useState('translator');
 
   useEffect(() => {
     // Apply the theme to the document
@@ -27,14 +29,6 @@ function App() {
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
-  };
-  
-  const toggleAdminMode = () => {
-    setIsAdminMode(!isAdminMode);
-  };
-  
-  const handleTabChange = (event, newValue) => {
-    setCurrentTab(newValue);
   };
 
   const theme = createTheme({
@@ -71,43 +65,41 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <div className="App">
-        <AppBar position="static" color="default" elevation={0}>
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Tradux
-            </Typography>
-            <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-            <Button 
-              color={isAdminMode ? "primary" : "inherit"}
-              onClick={toggleAdminMode}
-              sx={{ ml: 2 }}
-            >
-              {isAdminMode ? "Exit Admin" : "Admin Mode"}
-            </Button>
-          </Toolbar>
-          
-          <Tabs 
-            value={currentTab} 
-            onChange={handleTabChange}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-          >
-            <Tab label="Translator" value="translator" />
-            <Tab label="Usage" value="usage" />
-            {isAdminMode && <Tab label="Admin Dashboard" value="admin" />}
-          </Tabs>
-        </AppBar>
-        
-        <Container maxWidth="lg">
-          <Box sx={{ mt: 4 }}>
-            {currentTab === 'translator' && <TextReader />}
-            {currentTab === 'usage' && <UsageDashboard />}
-            {currentTab === 'admin' && isAdminMode && <AdminDashboard />}
-          </Box>
-        </Container>
-      </div>
+      <CssBaseline />
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            
+            <Container maxWidth="lg">
+              <Box sx={{ mt: 4 }}>
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<TextReader />} />
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/usage" element={<UsageDashboard />} />
+                  
+                  {/* Protected routes */}
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <UserProfile />
+                    </ProtectedRoute>
+                  } />
+                  
+                  <Route path="/admin" element={
+                    <ProtectedRoute adminOnly={true}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* Fallback route */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Box>
+            </Container>
+          </div>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

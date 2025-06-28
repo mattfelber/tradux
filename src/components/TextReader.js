@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Paper, Typography, Box, CircularProgress, Alert, LinearProgress, IconButton } from '@mui/material';
 import { translateText } from '../services/translationService';
+import UsageSummary from './UsageSummary';
 
 const TextReader = () => {
   const [text, setText] = useState('');
@@ -372,6 +373,9 @@ const TextReader = () => {
         <Typography variant="subtitle1" color="textSecondary">
           Instant translations with a <span className="highlight-word">click</span> or <span className="highlight-word">selection</span>
         </Typography>
+        
+        {/* Usage Summary */}
+        <UsageSummary />
 
         <div className="language-selector">
           <div className="language-select-container">
