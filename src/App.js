@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material';
+import { ThemeProvider, createTheme, Container, Box } from '@mui/material';
 import TextReader from './components/TextReader';
 import ApiTest from './components/ApiTest';
 import ThemeToggle from './components/ThemeToggle';
+import UsageDashboard from './components/UsageDashboard';
 import './App.css';
 
 function App() {
@@ -61,8 +62,13 @@ function App() {
         <div className="theme-toggle-container" style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 1000 }}>
           <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
         </div>
-        <ApiTest />
-        <TextReader />
+        <Container maxWidth="lg">
+          <Box sx={{ mt: 4 }}>
+            <UsageDashboard />
+            <ApiTest />
+            <TextReader />
+          </Box>
+        </Container>
       </div>
     </ThemeProvider>
   );

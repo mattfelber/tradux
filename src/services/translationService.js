@@ -1,6 +1,60 @@
 import axios from 'axios';
+import { supabase } from './supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
+
+// Helper function to get or create a session ID
+const getSessionId = () => {
+    let sessionId = localStorage.getItem('tradux_session_id');
+    if (!sessionId) {
+        sessionId = uuidv4();
+        localStorage.setItem('tradux_session_id', sessionId);
+    }
+    return sessionId;
+};
+
+// Track usage in Supabase
+const trackUsage = async (text, sourceLang, targetLang) => {
+    const sessionId = getSessionId();
+    const charactersProcessed = text.length;
+    
+    console.log('Attempting to track usage with Supabase...');
+    console.log('Session ID:', sessionId);
+    console.log('Characters:', charactersProcessed);
+    console.log('Source language:', sourceLang);
+    console.log('Target language:', targetLang);
+    
+    try {
+        // Check if supabase client is available
+        if (!supabase) {
+            console.error('Supabase client is not initialized');
+            return;
+        }
+        
+        const { data, error } = await supabase
+            .from('usage_metrics')
+            .insert([
+                { 
+                    session_id: sessionId,
+                    characters_processed: charactersProcessed,
+                    source_language: sourceLang,
+                    target_language: targetLang
+                }
+            ]);
+            
+        if (error) {
+            console.error('Supabase insert error:', error);
+        } else {
+            console.log(`Successfully tracked ${charactersProcessed} characters for translation`, data);
+        }
+    } catch (error) {
+        console.error('Failed to track usage:', error);
+    }
+};
 
 const translateText = async (text, sourceLang = 'auto', targetLang = 'en') => {
+    // Track usage first
+    await trackUsage(text, sourceLang, targetLang);
+    
     // Using Google Cloud Translation API
     const apiKey = process.env.REACT_APP_GOOGLE_TRANSLATE_API_KEY;
     
