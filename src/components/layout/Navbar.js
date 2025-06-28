@@ -39,7 +39,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
           textDecoration: 'none',
           color: 'inherit'
         }}>
-          Tradux
+          {/* App title removed - comment out to add */}
         </Typography>
         
         <ThemeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
