@@ -30,45 +30,24 @@ const trackUsage = async (text, sourceLang, targetLang) => {
             return;
         }
         
-        // Try to list tables to debug
-        console.log('Attempting to debug Supabase connection...');
-        
-        // Try with explicit schema
+        // Insert with all required fields including user_id as null for anonymous users
         const { data, error } = await supabase
             .from('usage_metrics')
             .insert([
                 { 
                     session_id: sessionId,
+                    user_id: null, // Set to null for anonymous users
                     characters_processed: charactersProcessed,
                     source_language: sourceLang,
                     target_language: targetLang
                 }
             ]);
         
-        // Log the full response for debugging
+        // Log the response for debugging
         console.log('Supabase response:', { data, error });
             
         if (error) {
             console.error('Supabase insert error:', error);
-            
-            // Try alternative table name as fallback
-            console.log('Trying fallback with public.usage_metrics...');
-            const { data: fallbackData, error: fallbackError } = await supabase
-                .from('public.usage_metrics')
-                .insert([
-                    { 
-                        session_id: sessionId,
-                        characters_processed: charactersProcessed,
-                        source_language: sourceLang,
-                        target_language: targetLang
-                    }
-                ]);
-                
-            if (fallbackError) {
-                console.error('Fallback also failed:', fallbackError);
-            } else {
-                console.log(`Successfully tracked ${charactersProcessed} characters using fallback`, fallbackData);
-            }
         } else {
             console.log(`Successfully tracked ${charactersProcessed} characters for translation`, data);
         }
